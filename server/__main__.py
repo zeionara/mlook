@@ -50,26 +50,20 @@ class Server:
 
                 name = names[0].text
 
-                items.append({'link': link, 'magnet-link': magnet_link, 'name': name})
+                images = search(name)
 
-                return search(name)
+                if len(images) < 1:
+                    raise ValueError(f'No images found for query {name}')
+                    continue
 
-                # print(images)
+                items.append({'link': link, 'magnet-link': magnet_link, 'name': name, 'poster': images[0]})
 
-                # if len(images) < 1:
-                #     raise ValueError(f'No images found for query {name}')
-                #     continue
+                # name_components = name.split('.', maxsplit = 2)
 
-                # print(images[0])
-
-                # dd
-
-                # # name_components = name.split('.', maxsplit = 2)
-
-                # # if len(name_components) > 2:
-                # #     print(link, magnet_link, ' '.join(name_components[:2]))
-                # # else:
-                # #     print(link, magnet_link, name)
+                # if len(name_components) > 2:
+                #     print(link, magnet_link, ' '.join(name_components[:2]))
+                # else:
+                #     print(link, magnet_link, name)
 
             return {
                 'items': items
