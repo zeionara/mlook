@@ -22,7 +22,7 @@ def search(query: str):
     html = get("https://www.google.com/search", params=params, headers=headers, timeout=30)
     soup = BeautifulSoup(html.text, "lxml")
 
-    return html.text
+    # return html.text
 
     google_images = []
 
@@ -68,13 +68,13 @@ def search(query: str):
         })
 
         # Download original images
-        print(f'Downloading {index} image...')
+        # print(f'Downloading {index} image...')
 
-        opener = urllib.request.build_opener()
-        opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36')]
-        urllib.request.install_opener(opener)
+        # opener = urllib.request.build_opener()
+        # opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36')]
+        # urllib.request.install_opener(opener)
 
-        urllib.request.urlretrieve(original, f'Bs4_Images/original_size_img_{index}.jpg')
+        # urllib.request.urlretrieve(original, f'Bs4_Images/original_size_img_{index}.jpg')
 
     return google_images
 

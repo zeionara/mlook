@@ -1,7 +1,7 @@
 from requests import get
 
 from flask import Flask
-from click import group, option
+from click import group, option, argument
 from bs4 import BeautifulSoup
 
 from .google_image_search import search
@@ -54,22 +54,22 @@ class Server:
 
                 return search(name)
 
-                print(images)
+                # print(images)
 
-                if len(images) < 1:
-                    raise ValueError(f'No images found for query {name}')
-                    continue
+                # if len(images) < 1:
+                #     raise ValueError(f'No images found for query {name}')
+                #     continue
 
-                print(images[0])
+                # print(images[0])
 
-                dd
+                # dd
 
-                # name_components = name.split('.', maxsplit = 2)
+                # # name_components = name.split('.', maxsplit = 2)
 
-                # if len(name_components) > 2:
-                #     print(link, magnet_link, ' '.join(name_components[:2]))
-                # else:
-                #     print(link, magnet_link, name)
+                # # if len(name_components) > 2:
+                # #     print(link, magnet_link, ' '.join(name_components[:2]))
+                # # else:
+                # #     print(link, magnet_link, name)
 
             return {
                 'items': items
@@ -88,6 +88,12 @@ def main():
 @option('--port', '-p', type = int, default = DEFAULT_PORT)
 def start(port: int):
     Server(port).start()
+
+
+@main.command()
+@argument('query', type = str)
+def search_images(query: str):
+    print(search(query)[0])
 
 
 if __name__ == '__main__':
