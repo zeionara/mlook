@@ -1,6 +1,5 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './style/app.sass';
 
 import axios from 'axios'
 
@@ -35,25 +34,12 @@ export default class App extends React.Component<{ url: string}, { movies: Movie
     console.log('rerender...')
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <div className = "movies">
-          {
-            this.state.movies.map((movie) => <MovieCard {...movie}></MovieCard>)
-          }
-          </div>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <h1>Latest movies</h1>
+        <div className = "movies">
+        {
+          this.state.movies.map((movie) => <MovieCard {...movie}></MovieCard>)
+        }
+        </div>
       </div>
     );
   }
