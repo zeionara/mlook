@@ -1,4 +1,5 @@
 from requests import get
+from json import load
 
 from flask import Flask
 from click import group, option, argument
@@ -7,6 +8,18 @@ from bs4 import BeautifulSoup
 from .google_image_search import search
 
 DEFAULT_PORT = 8080
+MOVIES_RESPONSE_EXAMPLE_PATH = 'assets/movies-response-example.json'
+
+
+def get_single_link(images):
+    if images is None or len(images) == 0:
+        return None
+
+    for image in images:
+        if image['source'] == 'IMDb':
+            return image['original']
+
+    return images[0]['original']
 
 
 class Server:
@@ -17,6 +30,7 @@ class Server:
         self.app = Flask('mlook')
 
         self._init_movies()
+        self._init_movies_example()
 
     def _init_movies(self):
         @self.app.route('/movies')
@@ -56,7 +70,7 @@ class Server:
                     raise ValueError(f'No images found for query {name}')
                     continue
 
-                items.append({'link': link, 'magnet-link': magnet_link, 'name': name, 'poster': images[0]})
+                items.append({'details': link, 'magnet': magnet_link, 'name': name, 'poster': get_single_link(images)})
 
                 # name_components = name.split('.', maxsplit = 2)
 
@@ -68,6 +82,12 @@ class Server:
             return {
                 'items': items
             }
+
+    def _init_movies_example(self):
+        @self.app.route('/movies-example')
+        def movies_example():
+            with open(MOVIES_RESPONSE_EXAMPLE_PATH, 'r', encoding = 'utf-8') as file:
+                return load(file)
 
     def start(self):
         self.app.run(host = '0.0.0.0', port = self.port)
