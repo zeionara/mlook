@@ -5,21 +5,22 @@ import './App.css';
 import axios from 'axios'
 
 import MovieCard from './components/MovieCard'
+import Movie from './Movie'
 
 function App() {
-  const url = 'https://www.justwatch.com/'
+  const url = 'http://localhost:8080/movies-example'
 
   axios.get(url, {
       method: 'GET',
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
-      },
-      withCredentials: true
+      }
     }
   ).then(
     function (response) {
-      console.log(response)
+      let movies = (response.data.items as {name: string, details: string, magnet: string, poster: string}[]).map((item) => new Movie(item))
+      console.log(movies)
     }
   )
 

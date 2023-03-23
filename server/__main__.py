@@ -4,6 +4,7 @@ from json import load
 from flask import Flask
 from click import group, option, argument
 from bs4 import BeautifulSoup
+from flask_cors import CORS
 
 from .google_image_search import search
 
@@ -27,7 +28,8 @@ class Server:
     def __init__(self, port: int = DEFAULT_PORT):
         self.port = port
 
-        self.app = Flask('mlook')
+        self.app = app = Flask('mlook')
+        CORS(app)
 
         self._init_movies()
         self._init_movies_example()
