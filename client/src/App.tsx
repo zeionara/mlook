@@ -19,11 +19,14 @@ export default class App extends React.Component<{ url: string}, { movies: Movie
   }
 
   pullMovies () {
+    console.log('pulling movies...')
+
     const app = this
 
     this.setState({ movies: this.state.movies, loading: true, offset: this.state.offset })
 
     const url = `${this.props.url}/${this.state.offset}/3`
+    const pulled = true
     // console.log('fetching from', url)
 
     axios.get(url, {
@@ -35,8 +38,15 @@ export default class App extends React.Component<{ url: string}, { movies: Movie
       }
     ).then(
       function (response) {
+        console.log('got response')
+        console.log(response)
+        // try {
         let movies = (response.data.items as {name: string, details: string, magnet: string, poster: string}[]).map((item) => new Movie(item))
         app.setState({ movies: [...app.state.movies, ...movies], loading: false, offset: app.state.offset + 1 })
+        // } catch (err) {
+        //   console.log(err)
+        //   app.pullMovies()
+        // }
       }
     )
   }
