@@ -35,9 +35,10 @@ class Server:
         self._init_movies_example()
 
     def _init_movies(self):
-        @self.app.route('/movies')
-        def movies():
-            page = get('https://thepiratebay0.org/browse/201')
+        @self.app.route('/movies/<page>/<section>')
+        def movies(page: int, section: int):
+            page = get(f'https://thepiratebay0.org/browse/201/{page}/{section}')
+            # page = get('https://thepiratebay0.org/browse/201')
             bs = BeautifulSoup(page.text, 'html.parser')
 
             items = []
@@ -86,8 +87,8 @@ class Server:
             }
 
     def _init_movies_example(self):
-        @self.app.route('/movies-example')
-        def movies_example():
+        @self.app.route('/movies-example/<page>/<section>')
+        def movies_example(page: int, section: int):
             with open(MOVIES_RESPONSE_EXAMPLE_PATH, 'r', encoding = 'utf-8') as file:
                 return load(file)
 

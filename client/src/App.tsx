@@ -8,11 +8,11 @@ import axios from 'axios'
 import MovieCard from './components/MovieCard'
 import Movie from './Movie'
 
-export default class App extends React.Component<{ url: string}, { movies: Movie[], loading: boolean }> {
+export default class App extends React.Component<{ url: string}, { movies: Movie[], loading: boolean, offset: number }> {
   constructor (props: { url: string }) {
     super(props)
 
-    this.state = { movies: [], loading: true }
+    this.state = { movies: [], loading: true, offset: 1 }
     this.pullMovies()
 
     this.handleScroll = this.handleScroll.bind(this)
@@ -21,8 +21,12 @@ export default class App extends React.Component<{ url: string}, { movies: Movie
   pullMovies () {
     const app = this
 
-    this.setState({ movies: this.state.movies, loading: true })
-    axios.get(this.props.url, {
+    this.setState({ movies: this.state.movies, loading: true, offset: this.state.offset })
+
+    const url = `${this.props.url}/${this.state.offset}/3`
+    // console.log('fetching from', url)
+
+    axios.get(url, {
         method: 'GET',
         headers: {
           'Access-Control-Allow-Origin': '*',
@@ -32,7 +36,7 @@ export default class App extends React.Component<{ url: string}, { movies: Movie
     ).then(
       function (response) {
         let movies = (response.data.items as {name: string, details: string, magnet: string, poster: string}[]).map((item) => new Movie(item))
-        app.setState({ movies: [...app.state.movies, ...movies], loading: false })
+        app.setState({ movies: [...app.state.movies, ...movies], loading: false, offset: app.state.offset + 1 })
       }
     )
   }
@@ -61,13 +65,12 @@ export default class App extends React.Component<{ url: string}, { movies: Movie
   }
 
   render () {
-    console.log('rerender...')
     return (
       <div className="App" >
         <h1>Latest movies</h1>
         <div className = "movies">
         {
-          this.state.movies.map((movie) => <MovieCard {...movie} key = {movie.name}></MovieCard>)
+          this.state.movies.map((movie, index) => <MovieCard {...movie} key = {index}></MovieCard>)
         }
         </div>
         <ThreeCircles
