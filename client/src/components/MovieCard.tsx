@@ -1,14 +1,13 @@
 import { Component } from 'react'
+import Movie from '../Movie'
 
+import '../style/movie.sass'
 
-export default class MovieCard extends Component<Readonly<{title: string}>, Readonly<{title: string}>> {
-    constructor(props: {title: string}) {
-        super(props)
-
-        this.state = { title: props.title }
-    }
-
+export default class MovieCard extends Component<Readonly<Movie>> {
     render() {
-        return <h1>{this.state.title}</h1>
+        return <div className="movie">
+          <img src = {this.props.poster} alt = {this.props.name} width = "300px"/>
+          <a href = {this.props.details}>{this.props.name.replace(/\./g, ' ')}</a><br/><a href = {this.props.magnet}>🧲</a>
+        </div>
     }
 }
