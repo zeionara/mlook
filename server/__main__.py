@@ -1,5 +1,7 @@
-from requests import get
 from json import load
+from time import time, sleep
+
+from requests import get
 
 from flask import Flask
 from click import group, option, argument
@@ -25,7 +27,7 @@ def get_single_link(images):
 
 class Server:
 
-    def __init__(self, port: int = DEFAULT_PORT):
+    def __init__(self, port: int = DEFAULT_PORT, min_movies_query_interval: int = 60):
         self.port = port
 
         self.app = app = Flask('mlook')
@@ -34,9 +36,21 @@ class Server:
         self._init_movies()
         self._init_movies_example()
 
+        self.last_query_timestamp = None
+
+        self.min_movies_query_interval = min_movies_query_interval
+
     def _init_movies(self):
         @self.app.route('/movies/<page>/<section>')
         def movies(page: int, section: int):
+
+            if self.last_query_timestamp is not None:
+                if (diff := time() - self.last_query_timestamp) < self.min_movies_query_interval:
+                    remaining_time = self.min_movies_query_interval - diff
+                    print(f'Waiting for {remaining_time} more seconds to avoid captcha')
+                    sleep(remaining_time)
+                    print('finished waiting')
+
             page = get(f'https://thepiratebay0.org/browse/201/{page}/{section}')
             # page = get('https://thepiratebay0.org/browse/201')
             bs = BeautifulSoup(page.text, 'html.parser')
@@ -67,11 +81,14 @@ class Server:
 
                 name = names[0].text
 
-                images = search(name)
+                images, html = search(name)
 
                 if len(images) < 1:
-                    raise ValueError(f'No images found for query {name}')
-                    continue
+                    self.last_query_timestamp = time()
+
+                    return html
+                    # raise ValueError(f'No images found for query {name}')
+                    # continue
 
                 items.append({'details': link, 'magnet': magnet_link, 'name': name, 'poster': get_single_link(images)})
 
@@ -81,6 +98,8 @@ class Server:
                 #     print(link, magnet_link, ' '.join(name_components[:2]))
                 # else:
                 #     print(link, magnet_link, name)
+
+            self.last_query_timestamp = time()
 
             return {
                 'items': items

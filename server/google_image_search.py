@@ -24,8 +24,6 @@ def search(query: str):
     html = get("https://www.google.com/search", params=params, headers=headers, timeout=30)
     soup = BeautifulSoup(html.text, "lxml")
 
-    # return html.text
-
     google_images = []
 
     all_script_tags = soup.select("script")
@@ -61,10 +59,13 @@ def search(query: str):
     ]
 
     for index, (metadata, thumbnail, original) in enumerate(zip(soup.select('.isv-r.PNCib.MSM1fd.BUooTd'), thumbnails, full_res_images), start=1):
+        selected = metadata.select_one(".VFACy.kGQAp.sMi44c.lNHeqe.WGvvNb")
+        meta_selected = metadata.select_one(".fxgdke")
+
         google_images.append({
-            "title": metadata.select_one(".VFACy.kGQAp.sMi44c.lNHeqe.WGvvNb")["title"],
-            "link": metadata.select_one(".VFACy.kGQAp.sMi44c.lNHeqe.WGvvNb")["href"],
-            "source": metadata.select_one(".fxgdke").text,
+            "title": None if selected is None else selected.get("title"),
+            "link": None if selected is None else selected.get("href"),
+            "source": None if meta_selected is None else meta_selected.text,
             "thumbnail": thumbnail,
             "original": original
         })
@@ -78,7 +79,7 @@ def search(query: str):
 
         # urllib.request.urlretrieve(original, f'Bs4_Images/original_size_img_{index}.jpg')
 
-    return google_images
+    return google_images, html.text
 
 
 # def get_images_with_request_headers():
