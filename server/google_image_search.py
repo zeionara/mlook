@@ -14,6 +14,7 @@ MLOOK_PROGRAMMABLE_SEARCH_ENGINE_API_KEY = os.environ['MLOOK_PROGRAMMABLE_SEARCH
 
 @as_tuple
 def search(query: str):
+    # print(query)
     response = get(
         'https://www.googleapis.com/customsearch/v1',
         params = {
@@ -23,6 +24,8 @@ def search(query: str):
             'searchType': 'image'
         }
     )
+
+    # print(response.json())
 
     match (code := response.status_code):
         case 200:
@@ -37,6 +40,7 @@ def search(query: str):
                 }
 
         case _:
+            print(response.json())
             raise ValueError(f'Invalid response code: {code}')
 
 # def search(query: str):

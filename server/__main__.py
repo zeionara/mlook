@@ -1,3 +1,4 @@
+import re
 from json import load
 from time import time, sleep
 
@@ -13,6 +14,8 @@ from .google_image_search import search
 DEFAULT_PORT = 8080
 MOVIES_RESPONSE_EXAMPLE_PATH = 'assets/movies-response-example.json'
 
+title_tech_details_pattern = re.compile(r'(?:1080|720).*')
+
 
 def get_single_link(images):
     if images is None or len(images) == 0:
@@ -23,6 +26,10 @@ def get_single_link(images):
             return image['original']
 
     return images[0]['original']
+
+
+def preprocess_title(title: str):
+    return title_tech_details_pattern.sub('', title).replace('.', ' ').strip()
 
 
 class Server:
@@ -36,7 +43,7 @@ class Server:
         self._init_movies()
         self._init_movies_example()
 
-        self.last_query_timestamp = None
+        # self.last_query_timestamp = None
 
         self.min_movies_query_interval = min_movies_query_interval
 
@@ -44,12 +51,12 @@ class Server:
         @self.app.route('/movies/<page>/<section>')
         def movies(page: int, section: int):
 
-            if self.last_query_timestamp is not None:
-                if (diff := time() - self.last_query_timestamp) < self.min_movies_query_interval:
-                    remaining_time = self.min_movies_query_interval - diff
-                    print(f'Waiting for {remaining_time} more seconds to avoid captcha')
-                    sleep(remaining_time)
-                    print('finished waiting')
+            # if self.last_query_timestamp is not None:
+            #     if (diff := time() - self.last_query_timestamp) < self.min_movies_query_interval:
+            #         remaining_time = self.min_movies_query_interval - diff
+            #         print(f'Waiting for {remaining_time} more seconds to avoid captcha')
+            #         sleep(remaining_time)
+            #         print('finished waiting')
 
             page = get(f'https://thepiratebay0.org/browse/201/{page}/{section}')
             # page = get('https://thepiratebay0.org/browse/201')
@@ -79,12 +86,12 @@ class Server:
                 if len(names) < 1:
                     continue
 
-                name = names[0].text
+                name = preprocess_title(names[0].text)
 
-                images = search(name)
+                images = search(f'{name} hd poster')
 
                 if len(images) < 1:
-                    self.last_query_timestamp = time()
+                    # self.last_query_timestamp = time()
                     raise ValueError(f'No images found for query {name}')
                     # continue
 
@@ -97,7 +104,7 @@ class Server:
                 # else:
                 #     print(link, magnet_link, name)
 
-            self.last_query_timestamp = time()
+            # self.last_query_timestamp = time()
 
             return {
                 'items': items
