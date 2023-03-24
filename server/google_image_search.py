@@ -8,18 +8,23 @@ from .collection_util import as_tuple
 # import lxml
 # from bs4 import BeautifulSoup
 
-MLOOK_PROGRAMMABLE_SEARCH_ENGINE_ID = os.environ['MLOOK_PROGRAMMABLE_SEARCH_ENGINE_ID']
+MLOOK_PROGRAMMABLE_SEARCH_ENGINE_IDS = os.environ['MLOOK_PROGRAMMABLE_SEARCH_ENGINE_IDS']
 MLOOK_PROGRAMMABLE_SEARCH_ENGINE_API_KEY = os.environ['MLOOK_PROGRAMMABLE_SEARCH_ENGINE_API_KEY']
+
+n_engine_ids = len(MLOOK_PROGRAMMABLE_SEARCH_ENGINE_IDS)
+current_engine_id = 0
 
 
 @as_tuple
 def search(query: str):
+    global current_engine_id
+
     # print(query)
     response = get(
         # 'https://www.googleapis.com/customsearch/v1/siterestrict',
-        'https://www.googleapis.com/customsearch/v1/siterestrict',
+        'https://www.googleapis.com/customsearch/v1',
         params = {
-            'cx': MLOOK_PROGRAMMABLE_SEARCH_ENGINE_ID,
+            'cx': MLOOK_PROGRAMMABLE_SEARCH_ENGINE_IDS[current_engine_id],
             'key': MLOOK_PROGRAMMABLE_SEARCH_ENGINE_API_KEY,
             'q': query,
             'searchType': 'image'
@@ -30,16 +35,32 @@ def search(query: str):
 
     match (code := response.status_code):
         case 200:
-            for image in response.json()['items']:
-                image_image = image.get('image')
+            items = response.json().get('items')
+            if items is None:
                 yield {
-                    'title': image.get('title'),
-                    'link': None if image_image is None else image_image['contextLink'],
-                    'source': image.get('displayLink'),
-                    'thumbnail': None if image_image is None else image_image['thumbnailLink'],
-                    'original': image.get('link')
+                    'title': query,
+                    'link': None,
+                    'source': 'unsplash.it',
+                    'thumbnail': None,
+                    'original': 'https://unsplash.it/600/400'
                 }
-
+            else:
+                for image in items:
+                    image_image = image.get('image')
+                    yield {
+                        'title': image.get('title'),
+                        'link': None if image_image is None else image_image['contextLink'],
+                        'source': image.get('displayLink'),
+                        'thumbnail': None if image_image is None else image_image['thumbnailLink'],
+                        'original': image.get('link')
+                    }
+        # case 429:
+        #     if current_engine_id < n_engine_ids - 1:
+        #         current_engine_id += 1
+        #         print(f'Switching to the api key with index {current_engine_id}')
+        #         return search(query)
+        #     else:
+        #         raise ValueError(f'Exhausted resources of all api keys')
         case _:
             print(response.json())
             raise ValueError(f'Invalid response code: {code}')
