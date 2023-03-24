@@ -16,7 +16,8 @@ MLOOK_PROGRAMMABLE_SEARCH_ENGINE_API_KEY = os.environ['MLOOK_PROGRAMMABLE_SEARCH
 def search(query: str):
     # print(query)
     response = get(
-        'https://www.googleapis.com/customsearch/v1',
+        # 'https://www.googleapis.com/customsearch/v1/siterestrict',
+        'https://www.googleapis.com/customsearch/v1/siterestrict',
         params = {
             'cx': MLOOK_PROGRAMMABLE_SEARCH_ENGINE_ID,
             'key': MLOOK_PROGRAMMABLE_SEARCH_ENGINE_API_KEY,
