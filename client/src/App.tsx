@@ -1,6 +1,6 @@
 import React from 'react'
 import './style/app.sass'
-import { ThreeCircles } from 'react-loader-spinner'
+import { InfinitySpin } from 'react-loader-spinner'
 // import { Events, scrollSpy, animateScroll } from 'react-scroll'
 
 import axios from 'axios'
@@ -19,7 +19,7 @@ export default class App extends React.Component<{ url: string}, { movies: Movie
   }
 
   pullMovies () {
-    console.log('pulling movies...')
+    // console.log('pulling movies...')
 
     const app = this
 
@@ -38,8 +38,8 @@ export default class App extends React.Component<{ url: string}, { movies: Movie
       }
     ).then(
       function (response) {
-        console.log('got response')
-        console.log(response)
+        // console.log('got response')
+        // console.log(response)
         // try {
         let movies = (response.data.items as {name: string, details: string, magnet: string, poster: string}[]).map((item) => new Movie(item))
         app.setState({ movies: [...app.state.movies, ...movies], loading: false, offset: app.state.offset + 1 })
@@ -69,32 +69,37 @@ export default class App extends React.Component<{ url: string}, { movies: Movie
     const maxScroll = Math.max( document.body.scrollHeight, document.body.offsetHeight, 
        document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );
 
-    if (Math.abs(maxScroll - window.scrollY - window.innerHeight) < 1 && !this.state.loading) {
+    const scrollDiff = Math.abs(maxScroll - window.scrollY - window.innerHeight)
+
+    if (scrollDiff < 2 && !this.state.loading) {
       this.pullMovies()
     }
   }
 
   render () {
+    let header
+
+    if (this.state.loading) {
+      header = null
+    } else {
+      header = <img src = "logo.png" alt = "logo" width = "400px" className = "logo"/>
+    }
+
+    let footer
+
+    if (this.state.loading) {
+      footer = <InfinitySpin width="200" color="#ff3d43"/>
+    } else {
+      footer = null
+    }
+
     return (
       <div className="App" >
-        <h1>Latest movies</h1>
+        { header }
         <div className = "movies">
-        {
-          this.state.movies.map((movie, index) => <MovieCard {...movie} key = {index}></MovieCard>)
-        }
+        { this.state.movies.map((movie, index) => <MovieCard {...movie} key = {index}></MovieCard>) }
         </div>
-        <ThreeCircles
-          height="100"
-          width="100"
-          color="#4fa94d"
-          wrapperStyle={{}}
-          wrapperClass=""
-          visible={this.state.loading}
-          ariaLabel="three-circles-rotating"
-          outerCircleColor=""
-          innerCircleColor=""
-          middleCircleColor=""
-        />
+        { footer }
       </div>
     );
   }
