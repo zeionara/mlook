@@ -1,4 +1,5 @@
 import re
+from random import uniform
 from json import load
 from time import time, sleep
 
@@ -14,7 +15,15 @@ from .google_image_search import search
 DEFAULT_PORT = 8080
 MOVIES_RESPONSE_EXAMPLE_PATH = 'assets/movies-response-example.json'
 
-title_tech_details_pattern = re.compile(r'(?:1080|720).*')
+title_tech_details_pattern = re.compile(
+    r'(?:' +
+    r'[A-Za-z]+[Rr][Ii][Pp]|[A-Za-z]+[Cc][Aa][Mm]' +
+    r'|1080|720|480' +
+    r'|[XxHh]264|MULTI|BluRay|WEB-DL' +
+    r'|iCELANDiC|iNTERNAL|AMZN|PROPER' +
+    r'|.\[?Erotic|DUBBED' +
+    r').*'
+)
 
 
 def get_single_link(images):
@@ -64,7 +73,13 @@ class Server:
 
             items = []
 
-            for item in bs.find(id = 'searchResult').find_all('tr')[1:]:
+            _items = bs.find(id = 'searchResult').find_all('tr')[1:]
+            n_items = len(_items) - 1
+            i = 0
+
+            print(f'Fetching {n_items} images...')
+
+            for item in _items:
                 # print(item)
 
                 links = item.find_all('a', {'class': 'detLink'})
@@ -88,14 +103,25 @@ class Server:
 
                 name = preprocess_title(names[0].text)
 
-                images = search(f'{name} hd poster')
+                images, html = search(f'{name} hd poster')
 
                 if len(images) < 1:
+                    return html
                     # self.last_query_timestamp = time()
-                    raise ValueError(f'No images found for query {name}')
+                    # raise ValueError(f'No images found for query {name}')
                     # continue
 
+                i += 1
+                print(f'Fetched {i} / {n_items} images')
+
                 items.append({'details': link, 'magnet': magnet_link, 'name': name, 'poster': get_single_link(images)})
+
+                if html is not None:  # if html is none then poster was taken from cache
+                    sleep_interval = uniform(2, 10)
+
+                    print(f'Making a pause for {sleep_interval} seconds')
+                    sleep(sleep_interval)
+                    print('Continuing...')
 
                 # name_components = name.split('.', maxsplit = 2)
 
@@ -134,7 +160,7 @@ def start(port: int):
 @main.command()
 @argument('query', type = str)
 def search_images(query: str):
-    print(search(query))
+    print(search(query)[0])
 
 
 if __name__ == '__main__':
