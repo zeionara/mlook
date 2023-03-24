@@ -19,7 +19,7 @@ def get_single_link(images):
         return None
 
     for image in images:
-        if image['source'] == 'IMDb':
+        if 'imdb' in image['source']:
             return image['original']
 
     return images[0]['original']
@@ -81,13 +81,11 @@ class Server:
 
                 name = names[0].text
 
-                images, html = search(name)
+                images = search(name)
 
                 if len(images) < 1:
                     self.last_query_timestamp = time()
-
-                    return html
-                    # raise ValueError(f'No images found for query {name}')
+                    raise ValueError(f'No images found for query {name}')
                     # continue
 
                 items.append({'details': link, 'magnet': magnet_link, 'name': name, 'poster': get_single_link(images)})
@@ -129,7 +127,7 @@ def start(port: int):
 @main.command()
 @argument('query', type = str)
 def search_images(query: str):
-    print(search(query)[0])
+    print(search(query))
 
 
 if __name__ == '__main__':

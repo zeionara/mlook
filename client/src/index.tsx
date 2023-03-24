@@ -9,7 +9,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <App url = "http://localhost:8080/movies"/>
+    <App url = "http://localhost:8080/movies-example"/>
   </React.StrictMode>
 );
 
